@@ -7,7 +7,7 @@ My master workflow sequences all the other flows calls:
 - Add to album and archive my screenshots
 - Add to album and archive my partner screenshots
 - Update People albums
-- Update people album (a bigger one I have separated from the previous line
+- Update People album (a bigger one I have separated from the previous call)
 ### Expected Input parameters
 None
 ### Screenshot
@@ -68,7 +68,8 @@ for a shared album, multiple users/peoples assets can be added to the same album
 I do have 1 ginormous album with 50k+ assets. That solution may not be scalable for that matter. If immich api allows to pull albums assets between 2 dates at some point this would be a good solution.
 ## Immich People Album Sub
 ### Description
-This flow must be called from another flow with the required input parameters. It'll add all the assets matching the parameters to the requested album BUT the ones from `assetIDs` (those already in the album)
+This flow is called from the previous flow with the required input parameters. 
+It recursively pulls assets between 2 dates until the returned count < 250 items and then add them to the designated album.
 ### Expected Input parameters
 ```{
     "startDate": "YYYY-MM-DD",
