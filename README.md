@@ -65,7 +65,7 @@ for a shared album, multiple users/peoples assets can be added to the same album
 <img width="695" alt="image" src="https://github.com/user-attachments/assets/e1160d7a-aef8-46f6-9cb2-b08e993b18a0">
 
 ### TODO
-I do have a ginormous albums with 50k+ assets. That solution my not be scalable for that matter. If immich api allows to pull albums assets between 2 dates at some point this would be a good solution.
+I do have 1 ginormous album with 50k+ assets. That solution may not be scalable for that matter. If immich api allows to pull albums assets between 2 dates at some point this would be a good solution.
 ## Immich People Album Sub
 ### Description
 This flow must be called from another flow with the required input parameters. It'll add all the assets matching the parameters to the requested album BUT the ones from `assetIDs` (those already in the album)
