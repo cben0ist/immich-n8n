@@ -1,0 +1,348 @@
+{
+  "active": false,
+  "connections": {
+    "Get All Not Archived PNGs": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pull the IDs": {
+      "main": [
+        [
+          {
+            "node": "Build Array",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Array": {
+      "main": [
+        [
+          {
+            "node": "Add to Album",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Pull the IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Init",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init": {
+      "main": [
+        [
+          {
+            "node": "Get All Not Archived PNGs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Album": {
+      "main": [
+        [
+          {
+            "node": "Archive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2024-07-17T18:48:31.672Z",
+  "id": "XuRznVTKkMW2GxAX",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Immich Screenshots",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('Init').item.json.BaseURL }}albums/{{ $('Init').item.json.screenshotAlbumID }}/assets",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n    \"Content-Type\": \"application/json\",\n    \"Accept\": \"application/json\",\n    \"x-api-key\": \"{{ $('Init').item.json.apiKey }}\"\n  }",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "610bb436-8e17-4cb7-a05c-a2286760b945",
+      "name": "Add to Album",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.BaseURL }}search/metadata",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n    \"Content-Type\": \"application/json\",\n    \"Accept\": \"application/json\",\n    \"x-api-key\": \"{{ $json.apiKey }}\"\n  }",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"takenAfter\": \"{{ $json.takenAfter }}\",\n    \"isArchived\": false,\n    \"originalFileName\": \"PNG\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "161574d1-647e-4c6c-9209-ffaee81d1805",
+      "name": "Get All Not Archived PNGs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.assets.items",
+        "options": {}
+      },
+      "id": "cb695e54-956e-436c-841a-1f14d41282f3",
+      "name": "Pull the IDs",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        920,
+        520
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4079e81b-73e8-488d-9652-f8e9db023956",
+      "name": "Build Array",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "c2f8fe00-67bc-42bf-80a7-3504e15df13c",
+              "leftValue": "={{ $json.body.assets.count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "305aa3c1-68e7-4083-b5a3-62767cf5bdc3",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        720,
+        520
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "c68167a0-ad8c-41e0-b853-92a3b299ef0b",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        280,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6a7ffa76-ecff-4f1f-9558-bcc8d89ae637",
+              "name": "BaseURL",
+              "value": "={{ $json.BaseURL }}",
+              "type": "string"
+            },
+            {
+              "id": "e54960f8-eaf9-4043-b30f-d6af8a758dee",
+              "name": "apiKey",
+              "value": "={{ $json.apiKey }}",
+              "type": "string"
+            },
+            {
+              "id": "68d10be5-f64b-4f8d-be72-0db677cf0d32",
+              "name": "takenAfter",
+              "value": "={{ $json.takenAfter }}",
+              "type": "string"
+            },
+            {
+              "id": "3177023d-af56-4a0f-af29-dca64981c249",
+              "name": "screenshotAlbumID",
+              "value": "={{ $json.screenshotAlbumID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "22286802-c242-4580-b03f-0beb7856e68a",
+      "name": "Init",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        520
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('Init').item.json.BaseURL }}assets/{{ $json.id }}",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "value": "="
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n    \"Content-Type\": \"application/json\",\n    \"Accept\": \"application/json\",\n    \"x-api-key\": \"{{ $('Init').item.json.apiKey }}\"\n  }",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n    \"isArchived\": true\n}",
+        "options": {}
+      },
+      "id": "e38023ab-511d-4561-b8c7-ffa8829f01ff",
+      "name": "Archive",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1340,
+        520
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Description\nThis flow must be called from another flow with the required input parameters.\nIt will search for all the assets taken after the input date, not archived and with PNG in the original file name, add them to the input album and archive them.\n",
+        "height": 169.38692294746133,
+        "width": 628.0945026273334,
+        "color": 7
+      },
+      "id": "47af1017-5972-4549-9af2-b1f860cc7792",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        260,
+        300
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Expected input parameters\n{\n    \"BaseURL\": \"https://my.immich/api/\",\n    \"apiKey\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"takenAfter\": \"YYYY-MM-DD\",\n    \"screenshotAlbumID\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"\n}",
+        "height": 173.44506248234495,
+        "width": 615.0945026273334,
+        "color": 7
+      },
+      "id": "4e68ae4d-a694-4d81-9a99-5812a6f4f45c",
+      "name": "Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        900,
+        300
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrencyRules": []
+    }
+  },
+  "tags": [
+    {
+      "createdAt": "2024-07-17T18:47:51.086Z",
+      "updatedAt": "2024-07-17T18:47:51.086Z",
+      "id": "vqnnSNSId7MvOYA6",
+      "name": "immich"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-07-22T16:14:40.000Z",
+  "versionId": "7c4a9485-5b63-4a0f-a158-9dbf7f4cd017"
+}
