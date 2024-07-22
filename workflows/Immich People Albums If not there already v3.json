@@ -1,0 +1,424 @@
+{
+  "active": false,
+  "connections": {
+    "Albums Split Out": {
+      "main": [
+        [
+          {
+            "node": "Get All Album IDs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Users Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "EndStart": {
+      "main": [
+        [
+          {
+            "node": "startEnd",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Persons Split Out": {
+      "main": [
+        [
+          {
+            "node": "EndStart",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "startEnd": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Album IDs": {
+      "main": [
+        [
+          {
+            "node": "Album/Assets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Album/Assets": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Users Split Out": {
+      "main": [
+        [
+          {
+            "node": "Persons Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Init",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init": {
+      "main": [
+        [
+          {
+            "node": "Albums Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2024-07-17T18:52:05.987Z",
+  "id": "FnpbYHQ7e1eeOAkQ",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Immich People Albums If not there already v3",
+  "nodes": [
+    {
+      "parameters": {
+        "fieldToSplitOut": "Albums",
+        "options": {}
+      },
+      "id": "22098aa4-41e8-4361-b23f-847a715afa0a",
+      "name": "Albums Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        640,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "Date.prototype.addDays = function(days) {\n    var date = new Date(this.valueOf());\n    date.setDate(date.getDate() + days);\n    return date;\n}\n\nvar endDate = new Date().addDays(+1)\nvar startDate = endDate.addDays(-30)\n\nreturn {\n  json: {\n    startDate: startDate.toISOString().split('T')[0],\n    endDate: endDate.toISOString().split('T')[0],\n    albumID: $json.albumID\n  }\n}"
+      },
+      "id": "b89474ed-e869-4cb7-9145-bdbff9c36920",
+      "name": "EndStart",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1080,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a6fc398c-7250-491b-b58c-db9184c6abb7",
+              "name": "startDate",
+              "value": "={{ $('EndStart').item.json.startDate }}",
+              "type": "string"
+            },
+            {
+              "id": "04a31c8c-324a-44a5-9465-7aca2b49fc94",
+              "name": "endDate",
+              "value": "={{ $('EndStart').item.json.endDate }}",
+              "type": "string"
+            },
+            {
+              "id": "58a14f28-b2ff-4638-b89f-a90243ee46f1",
+              "name": "persons",
+              "value": "=[\"{{ $('Persons Split Out').item.json['users.persons'] }}\"]",
+              "type": "array"
+            },
+            {
+              "id": "8e294c31-fa30-4117-b6eb-1633afaf9c4f",
+              "name": "apiKey",
+              "value": "={{ $('Albums Split Out').item.json.apiKey }}",
+              "type": "string"
+            },
+            {
+              "id": "8823871f-e36e-4c4b-94f6-9c1db4c24d87",
+              "name": "albumID",
+              "value": "={{ $('Albums Split Out').item.json.albumID }}",
+              "type": "string"
+            },
+            {
+              "id": "80490954-7d83-4971-aa46-be5c7d1afe98",
+              "name": "BaseURL",
+              "value": "={{ $('Init').item.json.BaseURL }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "76822faf-19e5-4950-9c25-a25061a87511",
+      "name": "startEnd",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1220,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "OBUdzJHEXXItc1tc",
+        "mode": "each",
+        "options": {}
+      },
+      "id": "82fabc4d-5f4a-43f1-af90-96ef36551685",
+      "name": "Execute Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "users.persons",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "60c00562-1b89-4732-a5cb-56a7d5a9cdb0",
+      "name": "Persons Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        940,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Init').item.json.BaseURL }}albums/{{ $json.albumID }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n    \"Content-Type\": \"application/json\",\n    \"Accept\": \"application/json\",\n    \"x-api-key\": \"{{ $json.apiKey }}\"\n} ",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "94c0a5b4-86ba-415c-abd7-dda87a464cff",
+      "name": "Get All Album IDs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        920,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "var albumID = $json.body.id;\nvar assets = $json.body.assets;\n\nvar assetIDs = []\nfor (let i = 0; i < assets.length; i++) {\n    assetIDs.push(assets[i].id)\n}\n// console.log(assetIDs)\n\nreturn {\n  json: {\n    albumID: albumID,\n    assetIDs: assetIDs,\n  }\n}"
+      },
+      "id": "cad1eb14-2bb2-4499-a363-d50e4a5093f8",
+      "name": "Album/Assets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        360
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "18ffbf0c-a923-4ebf-88f1-a003be214aea",
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        360,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "albumID",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "id": "fef19773-176e-4043-8373-b2e6a3da8e97",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1400,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "albumID, startDate, endDate, apiKey, persons",
+        "options": {}
+      },
+      "id": "e3c6a642-ad0f-41bc-825b-976e55f59933",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 1.1,
+      "position": [
+        1540,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "users",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "2470834b-2709-4303-bdef-753946168c33",
+      "name": "Users Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        800,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6a7ffa76-ecff-4f1f-9558-bcc8d89ae637",
+              "name": "BaseURL",
+              "value": "={{ $json.BaseURL }}",
+              "type": "string"
+            },
+            {
+              "id": "639243a9-519d-456f-ae8d-39a64cec334d",
+              "name": "Albums",
+              "value": "={{ $json.Albums }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fecff206-8dee-4e53-8308-4ae40eaa449f",
+      "name": "Init",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        500,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Description\nThis flow must be called from another flow with the required input parameters. Input parameters are a list of albums with a list of immich users and for each user a list of people IDs\nFor a personal album, 1 user will be required\nfor a shared album, multiple users/peoples assets can be added to the same albumID\n\n## Initial Setup\nUpdate the  `Execute Worflow` node with the imported sub-flow ID\n\n",
+        "height": 234.38692294746133,
+        "width": 733.0945026273334,
+        "color": 7
+      },
+      "id": "c174b23f-2223-4d42-bb2b-7a1ce447df40",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        320,
+        -80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Expected input parameters\n{\n    \"BaseURL\": \"https://my.immich.app/api/\",\n    \"Albums\": [\n        {\n            \"albumID\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\n            \"albumName\": \"Blablabla\",\n            \"apiKey\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n            \"users\": [\n                {\n                    \"persons\": [\n                        \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"\n                    ],\n                    \"apiKey\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"\n                },\n                {\n                    \"persons\": [\n                        \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"\n                    ],\n                    \"apiKey\": \"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy\"\n                }\n            ]\n        }\n    ]\n}\n",
+        "height": 235.44506248234495,
+        "width": 733.0945026273334,
+        "color": 7
+      },
+      "id": "c544d8b3-c8a0-499f-8b35-602ae782e2e1",
+      "name": "Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1080,
+        -80
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-07-17T18:47:51.086Z",
+      "updatedAt": "2024-07-17T18:47:51.086Z",
+      "id": "vqnnSNSId7MvOYA6",
+      "name": "immich"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-07-22T16:10:19.000Z",
+  "versionId": "6d7589da-591f-4f2c-8931-f60663a51f13"
+}
