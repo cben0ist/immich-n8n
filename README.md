@@ -71,7 +71,8 @@ I do have 1 ginormous album with 50k+ assets. That solution may not be scalable 
 This flow is called from the previous flow with the required input parameters. 
 It recursively pulls assets between 2 dates until the returned count < 250 items and then add them to the designated album.
 ### Expected Input parameters
-```{
+```
+{
     "startDate": "YYYY-MM-DD",
     "endDate": "YYYY-MM-DD",
     "persons": [
