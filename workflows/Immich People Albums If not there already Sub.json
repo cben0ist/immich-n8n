@@ -1,0 +1,592 @@
+{
+  "active": false,
+  "connections": {
+    "Get Persons assets": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "StartToMid": {
+      "main": [
+        [
+          {
+            "node": "startMid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MidToEnd": {
+      "main": [
+        [
+          {
+            "node": "midEnd",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "startMid": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "StartToMid",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "MidToEnd",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Diff",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Init": {
+      "main": [
+        [
+          {
+            "node": "Get Persons assets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Diff": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Init",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "midEnd": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Add to Album",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2024-07-17T18:49:58.335Z",
+  "id": "OBUdzJHEXXItc1tc",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Immich People Albums If not there already Sub",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.BaseURL }}search/metadata",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "x-api-key",
+              "value": "={{ $json.apiKey }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "takenAfter",
+              "value": "={{ $json.startDate }}"
+            },
+            {
+              "name": "takenBefore",
+              "value": "={{ $json.endDate }}"
+            },
+            {
+              "name": "personIds",
+              "value": "={{ $json.persons }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "9cdd9741-b69e-4e5f-a0c2-6949be275364",
+      "name": "Get Persons assets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1800,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "Date.prototype.addDays = function(days) {\n    var date = new Date(this.valueOf());\n    date.setDate(date.getDate() + days);\n    return date;\n}\n\nvar endDate = new Date($node[\"Init\"].data[\"endDate\"]).addDays(-1);\nvar startDate = new Date($node[\"Init\"].data[\"startDate\"]);\nvar diffDays = parseInt((endDate - startDate) / (1000 * 60 * 60 * 24)); \nvar midDate = startDate.addDays((diffDays/2)+1)\n\n\nreturn {\n  json: {\n    startDate: startDate.toISOString().split('T')[0],\n    endDate: midDate.toISOString().split('T')[0]\n  }\n}"
+      },
+      "id": "b0e519b4-7b6f-4065-8543-0bb82c6837e6",
+      "name": "StartToMid",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "Date.prototype.addDays = function(days) {\n    var date = new Date(this.valueOf());\n    date.setDate(date.getDate() + days);\n    return date;\n}\n  \nvar endDate = new Date($node[\"Init\"].data[\"endDate\"]).addDays(-1);\nvar startDate = new Date($node[\"Init\"].data[\"startDate\"]);\nvar diffDays = parseInt((endDate - startDate) / (1000 * 60 * 60 * 24)); \nvar midDate = startDate.addDays(diffDays/2)\nendDate = endDate.addDays(1)\n\n\nreturn {\n  json: {\n    startDate: midDate.toISOString().split('T')[0],\n    endDate: endDate.toISOString().split('T')[0]\n  }\n}"
+      },
+      "id": "6eafe61e-394d-498d-8eaa-99f71caf4887",
+      "name": "MidToEnd",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a6fc398c-7250-491b-b58c-db9184c6abb7",
+              "name": "startDate",
+              "value": "={{ $json.startDate }}",
+              "type": "string"
+            },
+            {
+              "id": "04a31c8c-324a-44a5-9465-7aca2b49fc94",
+              "name": "endDate",
+              "value": "={{ $json.endDate }}",
+              "type": "string"
+            },
+            {
+              "id": "8f20b24d-2f1f-4982-875a-6a5a3edc6e56",
+              "name": "persons",
+              "value": "={{ $node[\"Init\"].data[\"persons\"] }}",
+              "type": "array"
+            },
+            {
+              "id": "b038cd1a-ac97-44e5-96c7-2c7d0e59df09",
+              "name": "apiKey",
+              "value": "={{ $node[\"Init\"].data[\"apiKey\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "d1014bac-b69b-42ee-a386-b92fa0987948",
+              "name": "albumID",
+              "value": "={{ $node[\"Init\"].data[\"albumID\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "6932fbf0-b531-4006-a3f2-0777ee712199",
+              "name": "assetIDs",
+              "value": "={{ $node[\"Init\"].data[\"assetIDs\"] }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55226e21-f924-4735-a161-06797ad9f786",
+      "name": "startMid",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2360,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "aaf3adb3-1495-43e1-83be-b032d6fd0a80",
+              "leftValue": "={{ $json.body.assets.count }}",
+              "rightValue": 250,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "471dfb0d-2b5e-4667-877f-69ad0766ccd4",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1960,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "OBUdzJHEXXItc1tc",
+        "options": {}
+      },
+      "id": "e69791d7-151b-4baf-bd8a-36fc5c2a9988",
+      "name": "Execute Workflow",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": "OBUdzJHEXXItc1tc",
+        "options": {}
+      },
+      "id": "af724854-962a-4b0e-8a44-ecf04eb686db",
+      "name": "Execute Workflow1",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1,
+      "position": [
+        2520,
+        260
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "22e24e13-ed57-4c94-8413-d57806e84360",
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        1480,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1a8ed2ba-cdec-4184-be13-8687701b8771",
+              "name": "startDate",
+              "value": "={{ $json.startDate }}",
+              "type": "string"
+            },
+            {
+              "id": "48522ddc-d674-49ad-9939-bc0be4484ba0",
+              "name": "endDate",
+              "value": "={{ $json.endDate }}",
+              "type": "string"
+            },
+            {
+              "id": "ceeee8eb-f8dd-4ef3-a035-c4279403914e",
+              "name": "persons",
+              "value": "={{ $json.persons }}",
+              "type": "array"
+            },
+            {
+              "id": "cd624e38-dc68-4ae5-a51e-2c13e770d518",
+              "name": "apiKey",
+              "value": "={{ $json.apiKey }}",
+              "type": "string"
+            },
+            {
+              "id": "2d9fb483-30c2-4081-969c-a7b248e6ed50",
+              "name": "albumID",
+              "value": "={{ $json.albumID }}",
+              "type": "string"
+            },
+            {
+              "id": "b3917f7c-8b37-40e3-aae1-3d92e015abc7",
+              "name": "assetIDs",
+              "value": "={{ $json.assetIDs }}",
+              "type": "array"
+            },
+            {
+              "id": "15e2a665-b02c-4a73-8e22-5c470914bd6a",
+              "name": "BaseURL",
+              "value": "={{ $json.BaseURL }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "258a490c-3e9e-46d4-8bfa-74b532588842",
+      "name": "Init",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1640,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "var albumAssets = $('Init').item.json.assetIDs;\nvar foundAssets = $('Get Persons assets').item.json.body.assets.items;\n\nvar foundAssetsIDs = []\nfor (let i = 0; i < foundAssets.length; i++) {\n    foundAssetsIDs.push(foundAssets[i].id)\n}\n// console.log(albumAssets);\n\nlet difference = foundAssetsIDs.filter(x => !albumAssets.includes(x));\nconsole.log(difference);\n\nreturn {\n  json: {\n    assetIDs: difference,\n    count: difference.length\n  }\n}"
+      },
+      "id": "49ef6670-b0b9-44b4-ae46-d3479e0bc806",
+      "name": "Diff",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2200,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a6fc398c-7250-491b-b58c-db9184c6abb7",
+              "name": "startDate",
+              "value": "={{ $json.startDate }}",
+              "type": "string"
+            },
+            {
+              "id": "04a31c8c-324a-44a5-9465-7aca2b49fc94",
+              "name": "endDate",
+              "value": "={{ $json.endDate }}",
+              "type": "string"
+            },
+            {
+              "id": "8f20b24d-2f1f-4982-875a-6a5a3edc6e56",
+              "name": "persons",
+              "value": "={{ $node[\"Init\"].data[\"persons\"] }}",
+              "type": "array"
+            },
+            {
+              "id": "b038cd1a-ac97-44e5-96c7-2c7d0e59df09",
+              "name": "apiKey",
+              "value": "={{ $node[\"Init\"].data[\"apiKey\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "71b2dfee-1c76-48c3-9cef-c9bcad8e6af1",
+              "name": "albumID",
+              "value": "={{ $node[\"Init\"].data[\"albumID\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "eb8b36d4-8661-4192-9c28-6d6bdb844c23",
+              "name": "assetIDs",
+              "value": "={{ $('Init').item.json.assetIDs }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3bb5d9cf-8a37-4dfd-a783-e2e59a352822",
+      "name": "midEnd",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2360,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "14368327-ab35-4546-996d-34142e4e02ed",
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8639777b-7018-4f68-a16d-e93b50605a1f",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2360,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $('Init').item.json.BaseURL }}albums/{{ $('Init').item.json.albumID }}/assets",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={\n    \"Content-Type\": \"application/json\",\n    \"Accept\": \"application/json\",\n    \"x-api-key\": \"{{ $('Init').item.json.apiKey }}\"\n  } ",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "ids",
+              "value": "={{ $json.assetIDs }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6487757d-b208-4548-9f85-8193910687ac",
+      "name": "Add to Album",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2520,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Recursive call\nIf the previous request returned 250 assets then we are calling back the same workflow over 2 half time periods (Start to mid and mid to end)\nTODO: add an exception if start day == end day\n",
+        "height": 456.05675615212584,
+        "width": 572.6399217002239,
+        "color": 5
+      },
+      "id": "17941d7d-71af-403c-9eba-32526b1ec23c",
+      "name": "Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2160,
+        -20
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Add to Album\nPrevious request returned less than 250 assets. Add them to the album.\n",
+        "height": 260.41917225950823,
+        "width": 569.082874720357
+      },
+      "id": "90a45b2a-a56a-44d6-9b97-5a18d52cab2b",
+      "name": "Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2160,
+        460
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Description\nThis flow must be called from another flow with the required input parameters. It'll add all the assets matching the parameters to the requested album BUT the ones from `assetIDs` (those already in the album)\n\n## Initial Setup\nUpdate the 2 `Execute Worflow` nodes with this flow ID (from this page url)\n\n## Expected input parameters\n{\n    \"startDate\": \"YYYY-MM-DD\",\n    \"endDate\": \"YYYY-MM-DD\",\n    \"persons\": [\n        \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"\n    ],\n    \"apiKey\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\n    \"albumID\": \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\n    \"BaseURL\": \"https://my.immich.app/api/\",\n    \"assetIDs\": [\n        \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\",\n        \"xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx\"\n    ]\n}",
+        "height": 535.9566903893219,
+        "width": 569.082874720357,
+        "color": 7
+      },
+      "id": "0b083adc-b7fc-4a2e-8aa3-0c3346694129",
+      "name": "Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1480,
+        -20
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-07-17T18:47:51.086Z",
+      "updatedAt": "2024-07-17T18:47:51.086Z",
+      "id": "vqnnSNSId7MvOYA6",
+      "name": "immich"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2024-07-22T16:10:30.000Z",
+  "versionId": "0664cb07-92b3-4106-8c13-16f26fd4bb2c"
+}
